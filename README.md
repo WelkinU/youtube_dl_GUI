@@ -11,7 +11,7 @@ In my (limited) travels on the internet, I couldn't find an easy, reliable, and 
 1. Next choose the video format
     1. To download the highest quality of video, select the video format `Video - Best Quality`
     1. If you only want the audio (saved as .mp3), select `Audio Only - Best Quality`
-    1. If you want another video format, click the `Detect All Formats` button, which will fetch the available video formats and populate the dropdown with the available formats.
+    1. If you want another video format, click the `Detect All Formats` button, which will fetch the available video formats and populate the dropdown with the available formats. Warning: some of these formats may be video only or audio only!
 1. Click the Download button.
 
 ### Developer Setup
