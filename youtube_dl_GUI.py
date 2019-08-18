@@ -83,15 +83,18 @@ class App(QMainWindow):
 
             self.statusBar().showMessage('Downloading Video... Done.')
 
-
-
+        #set output path/format
         outtmpl = os.path.join(self.outputEntryText.text(),r'%(title)s.%(ext)s')
+
+        #create the youtube downloader options based on video format combobox selection
         if self.videoFormatCombobox.currentText() == self.default_video_formats_menu_items[0]:
+            #download best video quality
             ydl_opts = {
                 'format': 'best',
                 'outtmpl': outtmpl,
             }
         elif self.videoFormatCombobox.currentText() == self.default_video_formats_menu_items[1]:
+            #for downloading best audio and converting to mp3
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': outtmpl,
@@ -102,24 +105,29 @@ class App(QMainWindow):
                 }],
             }
         else:
+            #grab video format from the dropdown string: ie. "135 - some video metadata here" -> "135"
             video_format = self.videoFormatCombobox.currentText()[0:self.videoFormatCombobox.currentText().find('-')-1]
             ydl_opts = {
                 'format': video_format,
                 'outtmpl': outtmpl,
             }
 
+        #download the video in daemon thread
+        self.statusBar().showMessage('Downloading Video...') #update status bar
         thread = threading.Thread(target = downloadVideo_thread_helper, args = (self,ydl_opts,) )
         thread.daemon = True
         thread.start()
 
-        self.statusBar().showMessage('Downloading Video...')
-        
-        
-
     def updateVideoFormats(self):
+        ''' Grabs the list of available video formats in background thread and populates
+        video format combobox with results when complete.
+        '''
+
         def getVideoFormats_thread_helper(self,url):
+            ''' Grabs the available video formats. Intended to be run as background thread.
+            '''
             self.options = {
-                            'noplaylist': True,          # only download single song, not playlist
+                            'noplaylist': True, # only download single song, not playlist
                             }
             with youtube_dl.YoutubeDL(self.options) as ydl:
                 meta = ydl.extract_info(url, download=False)
@@ -133,18 +141,24 @@ class App(QMainWindow):
 
         url = self.urlEntryText.text()
         #check if is valid url
-        if not url.startswith('https://www.youtube.com/watch?'):
+        #should probably be reworked to be compatible with non-YouTube websites
+        if not url.startswith('https://www.youtube.com/watch?'): 
             #invalid url
             self.populateVideoFormatCombobox(self.default_video_formats_menu_items)
             return
 
         else:
+            #valid url - fetch the video formats in background daemon thread
             self.statusBar().showMessage('Downloading Video Formats')
             thread = threading.Thread(target = getVideoFormats_thread_helper, args = (self,url,) )
             thread.daemon = True
             thread.start()
             
     def populateVideoFormatCombobox(self,labels):
+        '''Populate the video format combobox with video formats. Clear the previous labels.
+
+        labels {list} -- list of strings representing the video format combobox options
+        '''
         self.videoFormatCombobox.clear()
 
         for label in labels:
@@ -152,6 +166,9 @@ class App(QMainWindow):
 
     @pyqtSlot()
     def updateOutputFolder(self):
+        ''' Callback for "Update Output Folder" button. Allows user to select
+        output directory via standard UI.
+        '''
         file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         print(file)
 
@@ -161,7 +178,9 @@ class App(QMainWindow):
             self.statusBar().showMessage('Select a folder.')
 
 def get_default_download_path():
-    """Returns the default downloads path for linux or windows"""
+    """Returns the path for the "Downloads" folder on Linux or Windows.
+    Used as default directory for videos to be saved to.
+    """
     if os.name == 'nt':
         import winreg
         sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
