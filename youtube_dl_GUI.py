@@ -6,19 +6,24 @@ from PyQt5.QtCore import pyqtSlot
 
 import threading
 import youtube_dl
+import json
+
+GUI_STATE_JSON_FILE = './youtube_dl_GUI_state.json'
 
 class App(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        gui_state = self.loadGUIState() #load GUI state from file, load default state if save file not found
+        self.download_folder_list = gui_state['DownloadFolderList']
+        self.default_video_formats_menu_items=['Video - Best Quality','Audio Only - Best Quality','Detect All Available Formats']
         
+        #initialize window dimensions
         self.left = 100
         self.top = 100
         self.width = 640
         self.height = 100
-
-        self.default_video_formats_menu_items=['Video - Best Quality','Audio Only - Best Quality']
-
         self.initUI()
         
     def initUI(self):
@@ -31,22 +36,26 @@ class App(QMainWindow):
         self.urlEntryText = QLineEdit()
         self.urlEntryText.setPlaceholderText('Enter YouTube URL')
         self.urlEntryText.setText('https://www.youtube.com/watch?v=C0DPdy98e4c') #set default video to download
-        #self.urlEntryText.textChanged.connect(self.updateVideoFormats) #set up callback to update video formats when URL is changed
+        self.urlEntryText.textChanged.connect(self.resetVideoFormats) #set up callback to update video formats when URL is changed
 
         #create output folder button and entry textbox
         outputFolderButton = QPushButton('Select Output Folder')
         outputFolderButton.setToolTip('Select output folder')
         outputFolderButton.clicked.connect(self.updateOutputFolder)
-        self.outputEntryText = QLineEdit()
-        self.outputEntryText.setPlaceholderText('Enter Download Folder')
-        self.outputEntryText.setText(get_default_download_path()) #set default output folder to be downloads folder
+        self.outputEntryCombobox = QComboBox()
+        self.outputEntryCombobox.setEditable(True)
 
-        #add combobox for video download format and autodetect formats button
-        detectFormatsButton = QPushButton('Detect All Formats')
-        detectFormatsButton.clicked.connect(self.updateVideoFormats)
+        for item in self.download_folder_list:
+            self.outputEntryCombobox.addItem(item) #set default output folder to be downloads folder
+        #self.outputEntryCombobox.editTextChanged[str].connect(self.downloadTextChanged)
+
+        #add combobox for video download format and detect formats button
+        detectFormatsLabel = QLabel('Download Format:')
 
         self.videoFormatCombobox = QComboBox()
         self.populateVideoFormatCombobox(self.default_video_formats_menu_items) #set default values for format select combobox
+        self.videoFormatCombobox.activated[str].connect(self.videoFormatChange)
+        
 
         #add download button
         downloadButton = QPushButton('Download')
@@ -59,8 +68,8 @@ class App(QMainWindow):
         layout.addWidget(urlEntryLabel,1,0)
         layout.addWidget(self.urlEntryText,1,1)
         layout.addWidget(outputFolderButton,2,0)
-        layout.addWidget(self.outputEntryText,2,1)
-        layout.addWidget(detectFormatsButton,3,0)
+        layout.addWidget(self.outputEntryCombobox,2,1)
+        layout.addWidget(detectFormatsLabel,3,0)
         layout.addWidget(self.videoFormatCombobox,3,1)
         layout.addWidget(downloadButton,5,0)
 
@@ -83,8 +92,17 @@ class App(QMainWindow):
 
             self.statusBar().showMessage('Downloading Video... Done.')
 
+        #make sure a valid output directory was entered
+        if not os.path.isdir(self.outputEntryCombobox.currentText()):
+            self.statusBar().showMessage('Invalid download directory!')
+            return
+
+        #make sure the Download Folder List combobox is populated with the latest entry
+        #this covers the case where the user uses the edittext portion of the combobox
+        self.addItemToDownloadsCombobox(self.outputEntryCombobox.currentText())
+
         #set output path/format
-        outtmpl = os.path.join(self.outputEntryText.text(),r'%(title)s.%(ext)s')
+        outtmpl = os.path.join(self.outputEntryCombobox.currentText(),r'%(title)s.%(ext)s')
 
         #create the youtube downloader options based on video format combobox selection
         if self.videoFormatCombobox.currentText() == self.default_video_formats_menu_items[0]:
@@ -101,7 +119,7 @@ class App(QMainWindow):
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
-                    'preferredquality': '192',
+                    'preferredquality': '192', #not actually best quality...
                 }],
             }
         else:
@@ -134,10 +152,11 @@ class App(QMainWindow):
                 formats = meta.get('formats', [meta])
 
             #add formats to combobox
-            item_list=self.default_video_formats_menu_items
+            item_list=self.default_video_formats_menu_items[0:2]
             item_list.extend([ f['format'] +' ' +f['ext'] for f in formats])
             self.populateVideoFormatCombobox(item_list)
             self.statusBar().showMessage('Finished Downloading Video Formats')
+            self.videoFormatCombobox.setCurrentIndex(0)
 
         url = self.urlEntryText.text()
         #check if is valid url
@@ -153,7 +172,16 @@ class App(QMainWindow):
             thread = threading.Thread(target = getVideoFormats_thread_helper, args = (self,url,) )
             thread.daemon = True
             thread.start()
-            
+
+    def videoFormatChange(self,text):
+        if text == self.default_video_formats_menu_items[2]:
+            #detect video formats was selected
+
+            #update statusbar to let user know something is happening
+            self.statusBar().showMessage('Loading available formats...')
+            #update video formats
+            self.updateVideoFormats()
+    
     def populateVideoFormatCombobox(self,labels):
         '''Populate the video format combobox with video formats. Clear the previous labels.
 
@@ -164,22 +192,89 @@ class App(QMainWindow):
         for label in labels:
             self.videoFormatCombobox.addItem(label)
 
+    def resetVideoFormats(self):
+        idx = self.videoFormatCombobox.currentIndex()
+
+        self.populateVideoFormatCombobox(self.default_video_formats_menu_items)
+
+        #preserve combobox index if possible
+        if idx>1:
+            self.videoFormatCombobox.setCurrentIndex(0)
+        else:
+            self.videoFormatCombobox.setCurrentIndex(idx)
+
     @pyqtSlot()
     def updateOutputFolder(self):
         ''' Callback for "Update Output Folder" button. Allows user to select
         output directory via standard UI.
         '''
         file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        print(file)
 
         if len(file)>0:
-            self.outputEntryText.setText(file)
+            self.addItemToDownloadsCombobox(file)
         else:
-            self.statusBar().showMessage('Select a folder.')
+            self.statusBar().showMessage('Select a folder!')
+
+    def downloadTextChanged(self,text):
+        #function not used right now
+        if text not in self.download_folder_list and os.path.isdir(text):
+            self.addItemToDownloadsCombobox(text)
+
+    def addItemToDownloadsCombobox(self,text):
+        if text not in self.download_folder_list:
+            #if it's not in the list, add it to the list
+            self.download_folder_list = [text]+self.download_folder_list
+        else:
+            #if it's in the list already, move it to the top of the list
+            self.download_folder_list = [text]+[folder for folder in self.download_folder_list if not folder == text]
+
+        #maximum download folder history of 5
+        if len(self.download_folder_list)>5:
+            self.download_folder_list = self.download_folder_list[0:6]
+
+        #update the combobox
+        self.outputEntryCombobox.clear()
+        for item in self.download_folder_list:
+            self.outputEntryCombobox.addItem(item)
+
+        self.outputEntryCombobox.setCurrentIndex(0) #reset index - just in case
+
+    def saveGUIState(self):
+        save_dict= {'DownloadFolderList': self.download_folder_list,
+                    }
+
+        with open(GUI_STATE_JSON_FILE,'w') as file:
+            json.dump(save_dict,file)
+
+    def loadGUIState(self):
+        if os.path.isfile(GUI_STATE_JSON_FILE):
+            with open(GUI_STATE_JSON_FILE, 'r') as file:
+                save_data = json.load(file)
+
+            if isinstance(save_data['DownloadFolderList'],str):
+                save_data['DownloadFolderList'] = [save_data['DownloadFolderList']] #convert to list
+
+        else:
+            save_data = {'DownloadFolderList': [get_default_download_path()],
+                        }
+
+        return save_data
+
+    def closeEvent(self, event):
+        '''This function gets called when the user closes the GUI. It saves the GUI state to the json file
+        GUI_STATE_JSON_FILE.
+        '''
+        self.saveGUIState()
+        if True:
+            event.accept() # let the window close
+        else:
+            event.ignore()
+
 
 def get_default_download_path():
     """Returns the path for the "Downloads" folder on Linux or Windows.
     Used as default directory for videos to be saved to.
+    #From: https://stackoverflow.com/questions/35851281/python-finding-the-users-downloads-folder
     """
     if os.name == 'nt':
         import winreg
