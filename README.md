@@ -11,21 +11,23 @@ In my (limited) travels on the internet, I couldn't find an easy, reliable, and 
 1. Next choose the video format
     1. To download the highest quality of video, select the video format `Video - Best Quality`
     1. If you only want the audio (saved as .mp3), select `Audio Only - Best Quality`
-    1. If you want another video format, click the `Detect All Formats` button, which will fetch the available video formats and populate the dropdown with the available formats. Warning: some of these formats may be video only or audio only!
+    1. If you want another video format, click `Detect All Available Formats`, which will fetch the available video formats and populate the dropdown with the available formats. Warning: some of these formats may be video only or audio only!
 1. Click the Download button.
 
 ### Developer Setup
-Just set up Python3 with libraries PyQT5 (`pip install pyqt5`) and youtube_dl (`pip install youtube-dl`), and you should be able to run the code.
+Just set up Python3 with libraries PyQT5 (`pip install pyqt5`), youtube_dl (`pip install youtube-dl`), and ffmpeg (`pip install ffmpeg`) and run youtube_dl_GUI.py (cd to the repository path, and then `python youtube_dl_GUI.py`).
 
-To build the code into an .exe using PyInstaller (easier to do this in an Anaconda environment):
+To build the code into an .exe using PyInstaller (much easier to do this in an Anaconda environment). Important note: I use Python 3.5 with PyInstaller, and not newer Python versions to avoid issues with the `modulegraph` module.
 1. Install PyInstaller: `pip install pyinstaller`
-1. Make sure you have PyQT5 and youtube_dl installed
+1. Make sure you have PyQT5 / youtube_dl / ffmpeg installed
 1. cd to the directory containing youtube_dl_GUI.py
 1. Run command: `pyinstaller.exe youtube_dl_GUI.py --onefile --hidden-import PyQt5.sip`
+1. The standalone exe should be in the /dist folder.
 
 ### Troubleshooting
 Make sure you have the latest version of youtube-dl! Use `pip install --upgrade youtube-dl`in the command line.
+For downloading audio only, you may need to install ffmpeg to handle the mp4 -> mp3 conversion
 
 ### TODO:
 - [ ] Additional support for handling YouTube playlists
-- [ ] Improve user interface for video formats other than best video/audio.
+- [x] Improve user interface for video formats other than best video/audio.
