@@ -25,6 +25,7 @@ class App(QMainWindow):
         self.width = 640
         self.height = 100
         self.initUI()
+        self.videoFormatCombobox.setCurrentIndex(gui_state['DownloadFormatComboboxIndex'])
         
     def initUI(self):
         self.setWindowTitle('YouTube DL GUI')
@@ -240,7 +241,9 @@ class App(QMainWindow):
         self.outputEntryCombobox.setCurrentIndex(0) #reset index - just in case
 
     def saveGUIState(self):
+        DownloadFormatComboboxIndex = self.videoFormatCombobox.currentIndex()
         save_dict= {'DownloadFolderList': self.download_folder_list,
+                    'DownloadFormatComboboxIndex': DownloadFormatComboboxIndex if DownloadFormatComboboxIndex in [0,1] else 0,
                     }
 
         with open(GUI_STATE_JSON_FILE,'w') as file:
@@ -254,8 +257,12 @@ class App(QMainWindow):
             if isinstance(save_data['DownloadFolderList'],str):
                 save_data['DownloadFolderList'] = [save_data['DownloadFolderList']] #convert to list
 
+            if 'DownloadFormatComboboxIndex' not in save_data:
+                save_data['DownloadFormatComboboxIndex'] = 0
+
         else:
             save_data = {'DownloadFolderList': [get_default_download_path()],
+                        'DownloadFormatComboboxIndex': 0,
                         }
 
         return save_data
@@ -274,17 +281,8 @@ class App(QMainWindow):
 def get_default_download_path():
     """Returns the path for the "Downloads" folder on Linux or Windows.
     Used as default directory for videos to be saved to.
-    #From: https://stackoverflow.com/questions/35851281/python-finding-the-users-downloads-folder
     """
-    if os.name == 'nt':
-        import winreg
-        sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-        downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-            location = winreg.QueryValueEx(key, downloads_guid)[0]
-        return location
-    else:
-        return os.path.join(os.path.expanduser('~'), 'downloads')
+    return os.path.join(os.path.expanduser('~'), 'downloads')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
