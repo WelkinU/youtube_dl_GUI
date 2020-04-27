@@ -26,6 +26,8 @@ To build the code into an .exe using PyInstaller (easier to do this in an Anacon
 ### Troubleshooting
 Make sure you have the latest version of youtube-dl! Use `pip install --upgrade youtube-dl`in the command line.
 
+When downloading a video, if you are encountering "HTTP Error 403: Forbidden" try `youtube-dl --rm-cache-dir` or remove directory 'C:\Users\USERNAME/.cache\youtube-dl'. This is currently a bug in youtube-dl.
+
 ### TODO:
 - [ ] Additional support for handling YouTube playlists
 - [ ] Improve user interface for video formats other than best video/audio.
