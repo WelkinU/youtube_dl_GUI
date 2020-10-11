@@ -1,6 +1,6 @@
 # youtube_dl_GUI
 
-In my (limited) travels on the internet, I couldn't find an easy, reliable, and safe way to download YouTube videos / music. youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube videos/audio tracks/playlists that can be easily shared and used by non-programmers. youtube_dl_GUI can be run as a standalone .exe by running /dist/youtube_dl_GUI.exe
+youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube videos/audio tracks/playlists that can be easily shared and used by non-programmers. youtube_dl_GUI can be run as a standalone .exe by running /dist/youtube_dl_GUI.exe
 
 ![](images/window.png)
 
@@ -27,7 +27,3 @@ To build the code into an .exe using PyInstaller (easier to do this in an Anacon
 Make sure you have the latest version of youtube-dl! Use `pip install --upgrade youtube-dl`in the command line.
 
 When downloading a video, if you are encountering "HTTP Error 403: Forbidden" try `youtube-dl --rm-cache-dir` or remove directory 'C:\Users\USERNAME/.cache\youtube-dl'. This is currently a bug in youtube-dl.
-
-### TODO:
-- [ ] Additional support for handling YouTube playlists
-- [ ] Improve user interface for video formats other than best video/audio.
