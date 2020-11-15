@@ -4,6 +4,9 @@ youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube
 
 ![](images/window.png)
 
+## UPDATE
+As of Oct 28 2020, the Youtube-dl library has been taken down in response to a RIAA DMCA takedown notice, and the latest version of the library (Sept 20, 2020 release) no longer is no longer compatible with Youtube. As such, this repository has been migrated to the [Youtube-dlc](https://github.com/blackjack4494/yt-dlc) fork (which has not been DMCA'd and is still actively maintained). End users of this repository shouldn't notice any changes.
+
 ### Usage
 1. Run standalone youtube_dl_GUI.exe in the /dist folder. Alternatively, you can run the python code youtube_dl_GUI.py 
 1. Enter the URL of the video you want to download into the top "URL" textbox.
@@ -15,15 +18,13 @@ youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube
 1. Click the Download button.
 
 ### Developer Setup
-Just set up Python3 with libraries PyQT5 (`pip install pyqt5`) and youtube_dl (`pip install youtube-dl`), and you should be able to run the code.
+Just set up Python3 with libraries PyQT5 (`pip install pyqt5`) and youtube_dlc (`pip install youtube-dlc`), and you should be able to run the code.
 
 To build the code into an .exe using PyInstaller (easier to do this in an Anaconda environment):
 1. Install PyInstaller: `pip install pyinstaller`
-1. Make sure you have PyQT5 and youtube_dl installed
+1. Make sure you have PyQT5 and youtube_dlc installed
 1. cd to the directory containing youtube_dl_GUI.py
 1. Run command: `pyinstaller.exe youtube_dl_GUI.py --onefile --hidden-import PyQt5.sip`
 
 ### Troubleshooting
-Make sure you have the latest version of youtube-dl! Use `pip install --upgrade youtube-dl`in the command line.
-
-When downloading a video, if you are encountering "HTTP Error 403: Forbidden" try `youtube-dl --rm-cache-dir` or remove directory 'C:\Users\USERNAME/.cache\youtube-dl'. This is currently a bug in youtube-dl.
+Make sure you have the latest version of youtube-dlc! Use `pip install --upgrade youtube-dlc`in the command line.
