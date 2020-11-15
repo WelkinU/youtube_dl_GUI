@@ -5,8 +5,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 
 import threading
-import youtube_dl
 import json
+
+#changed this line to reflect library migration from DMCA'd youtube-dl, to fork youtube-dlc
+import youtube_dlc as youtube_dl  
 
 GUI_STATE_JSON_FILE = './youtube_dl_GUI_state.json'
 
