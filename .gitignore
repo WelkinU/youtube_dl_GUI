@@ -2,5 +2,4 @@
 __pycache__/
 build/
 *.spec
-*.gitattributes
 *.json
