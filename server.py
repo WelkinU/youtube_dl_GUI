@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form, File, UploadFile, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ValidationError, validator
 from typing import List, Optional
@@ -74,34 +74,23 @@ class DownloadRequest(BaseModel):
 
 
 
-@app.post("/", response_model = DownloadRequest)
-async def download_video(form_data: DownloadRequest = Depends(DownloadRequest)):
-	url, download_format = form_data.url, form_data.download_format
-
-	download_video(url, download_format)
-	return form_data
-
-
-#solution https://github.com/tiangolo/fastapi/issues/1989#issuecomment-684053705
-#this works but its kinda messy and doesn't involve the response model?
-#is there a proper way to do this?
-'''
 @app.post("/")
-async def download_video(url: str = Form(...), download_format: str = Form(...)):
-	try:
-		dl = DownloadRequest(url = url, download_format = download_format)
-		print(dl)
-	except ValidationError as e:
-		print(e)
-		return JSONResponse(content=e.errors())
+async def download_video(form_data: DownloadRequest = Depends(DownloadRequest)):
+	full_filename = download_video(form_data.url, form_data.download_format)
+
+	response = FileResponse(full_filename, 
+					headers = {'Content-Disposition': f'attachment;filename={os.path.basename(full_filename)}'})
+
+	'''clean up file here as background task'''
+
+	return response
 	
-	return {"URL":url,"download_format":download_format}
-'''
 
 def download_video(url, download_format, download_folder = './downloads/'):
+	print('url',url,'format',download_format)
 	os.makedirs(download_folder, exist_ok = True)
 	filename = str(uuid.uuid4()) #generate random unique string 
-	outtmpl = os.path.join(download_folder,f'{filename}')
+	outtmpl = os.path.join(download_folder,f'{filename}.%(ext)s')
 
 	if download_format == 'VideoBestQuality':
 		#download best video quality
@@ -128,9 +117,14 @@ def download_video(url, download_format, download_folder = './downloads/'):
 		}
 
 	with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-		ydl.download(url)
+		res = ydl.download([url])
 
-	return filename
+	#not sure how to return the filename from youtube-dl, so hacking it here
+	full_filename = [os.path.join(download_folder,f) 
+						for f in os.listdir(download_folder)
+						if filename in f][0]
+
+	return full_filename
 
 #mause solution only works with this exception handler to capture the validation errors
 @app.exception_handler(Exception)
