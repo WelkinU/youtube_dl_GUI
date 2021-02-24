@@ -5,11 +5,7 @@ from pydantic import BaseModel, ValidationError, validator
 from typing import List, Optional
 
 import youtube_dl as youtube_dl
-import uuid
 import os
-
-from pprint import pprint
-
 
 app = FastAPI()
 
@@ -78,8 +74,8 @@ class DownloadRequest(BaseModel):
 async def download_video(form_data: DownloadRequest = Depends(DownloadRequest)):
 	full_filename = download_video(form_data.url, form_data.download_format)
 
-	response = FileResponse(full_filename, 
-					headers = {'Content-Disposition': f'attachment;filename={os.path.basename(full_filename)}'})
+	headers = {'Content-Disposition': f'attachment;filename={os.path.basename(full_filename)}'}
+	response = FileResponse(full_filename, headers = headers)
 
 	'''clean up file here as background task'''
 
@@ -87,10 +83,9 @@ async def download_video(form_data: DownloadRequest = Depends(DownloadRequest)):
 	
 
 def download_video(url, download_format, download_folder = './downloads/'):
-	print('url',url,'format',download_format)
 	os.makedirs(download_folder, exist_ok = True)
-	filename = str(uuid.uuid4()) #generate random unique string 
-	outtmpl = os.path.join(download_folder,f'{filename}.%(ext)s')
+
+	outtmpl = os.path.join(download_folder,r'%(title)s.%(ext)s')
 
 	if download_format == 'VideoBestQuality':
 		#download best video quality
@@ -117,12 +112,15 @@ def download_video(url, download_format, download_folder = './downloads/'):
 		}
 
 	with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-		res = ydl.download([url])
+		meta = ydl.extract_info(url, download=True)
 
+	full_filename = os.path.join(download_folder,f"{meta['title']}.{meta['ext']}")
 	#not sure how to return the filename from youtube-dl, so hacking it here
+	'''
 	full_filename = [os.path.join(download_folder,f) 
 						for f in os.listdir(download_folder)
 						if filename in f][0]
+	'''
 
 	return full_filename
 
