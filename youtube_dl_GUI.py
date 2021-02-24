@@ -147,10 +147,9 @@ class App(QMainWindow):
         def getVideoFormats_thread_helper(self,url):
             ''' Grabs the available video formats. Intended to be run as background thread.
             '''
-            self.options = {
-                            'noplaylist': True, # only download single song, not playlist
-                            }
-            with youtube_dl.YoutubeDL(self.options) as ydl:
+            options = {'noplaylist': True, # only download single song, not playlist
+                        }
+            with youtube_dl.YoutubeDL(options) as ydl:
                 meta = ydl.extract_info(url, download=False)
                 formats = meta.get('formats', [meta])
 
