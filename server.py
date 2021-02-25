@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, File, UploadFile, Depends
+from fastapi import FastAPI, Request, Form, File, UploadFile, Depends, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ValidationError, validator
@@ -23,7 +23,7 @@ def home(request: Request):
 <h2>Enter a YouTube URL and download format</h2>
 <form method="post">
   <div>
-	<label>Enter YouTube url: </label>
+	<label>Enter YouTube URL </label>
 	<input type="text" name="url" style="width:400px" placeholder="https://www.youtube.com/watch?v=C0DPdy98e4c">
 	<div>
 	  <label>Download Format</label>
@@ -71,14 +71,14 @@ class DownloadRequest(BaseModel):
 
 
 @app.post("/")
-async def download_video(form_data: DownloadRequest = Depends(DownloadRequest)):
+async def download_video(background_tasks: BackgroundTasks, form_data: DownloadRequest = Depends(DownloadRequest)):
 	full_filename = download_video(form_data.url, form_data.download_format)
 
 	headers = {'Content-Disposition': f'attachment;filename={os.path.basename(full_filename)}'}
 	response = FileResponse(full_filename, headers = headers)
 
 	'''clean up file here as background task'''
-
+	background_tasks.add_task(os.remove,full_filename)
 	return response
 	
 
@@ -115,12 +115,6 @@ def download_video(url, download_format, download_folder = './downloads/'):
 		meta = ydl.extract_info(url, download=True)
 
 	full_filename = os.path.join(download_folder,f"{meta['title']}.{meta['ext']}")
-	#not sure how to return the filename from youtube-dl, so hacking it here
-	'''
-	full_filename = [os.path.join(download_folder,f) 
-						for f in os.listdir(download_folder)
-						if filename in f][0]
-	'''
 
 	return full_filename
 
@@ -129,3 +123,11 @@ def download_video(url, download_format, download_folder = './downloads/'):
 async def exception_handler(request: Request, exc: Exception):
 	error_message = f"Unexpected error occurred: {exc}"
 	return JSONResponse(content={'message': exc.errors()}, status_code = 422)
+
+
+if __name__ == '__main__':
+	import uvicorn
+
+	#make the app string equal to whatever the name of this file is
+	app_str = 'server:app'
+	uvicorn.run(app_str, host='localhost', port=8000, reload=True, workers=1)
