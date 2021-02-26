@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ValidationError, validator
 from typing import List, Optional
 
-import youtube_dl as youtube_dl
+import youtube_dl
 import os
 
 app = FastAPI()
