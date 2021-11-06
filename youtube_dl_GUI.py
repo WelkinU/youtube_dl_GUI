@@ -20,18 +20,17 @@ class App(QMainWindow):
         self.download_folder_list = gui_state['DownloadFolderList']
         self.default_video_formats_menu_items=['Video - Best Quality','Audio Only - Best Quality','Detect All Available Formats']
         
-        #initialize window dimensions
-        self.left = 100
-        self.top = 100
-        self.width = 640
-        self.height = 100
+        
         self.initUI()
         self.videoFormatCombobox.setCurrentIndex(gui_state['DownloadFormatComboboxIndex'])
         
     def initUI(self):
         self.setWindowTitle('YouTube DL GUI')
-        self.setGeometry(self.left, self.top, self.width, self.height)
         self.statusBar().showMessage('Welcome to YouTube Downloader GUI!') #initialize status bar
+
+        #initialize window dimensions
+        left, top, width, height = 100, 100, 640, 100
+        self.setGeometry(left, top, width, height)
 
         #create URL entry buttons and entry textbox
         urlEntryLabel = QLabel('Enter URL:')
@@ -49,7 +48,6 @@ class App(QMainWindow):
 
         for item in self.download_folder_list:
             self.outputEntryCombobox.addItem(item) #set default output folder to be downloads folder
-        #self.outputEntryCombobox.editTextChanged[str].connect(self.downloadTextChanged)
 
         #add combobox for video download format and detect formats button
         detectFormatsLabel = QLabel('Download Format:')
@@ -161,12 +159,10 @@ class App(QMainWindow):
 
         url = self.urlEntryText.text()
         #check if is valid url
-        #should probably be reworked to be compatible with non-YouTube websites
         if not url.startswith('https://www.youtube.com/watch?'): 
             #invalid url
             self.populateVideoFormatCombobox(self.default_video_formats_menu_items)
             return
-
         else:
             #valid url - fetch the video formats in background daemon thread
             self.statusBar().showMessage('Downloading Video Formats')
@@ -177,11 +173,8 @@ class App(QMainWindow):
     def videoFormatChange(self,text):
         if text == self.default_video_formats_menu_items[2]:
             #detect video formats was selected
-
-            #update statusbar to let user know something is happening
-            self.statusBar().showMessage('Loading available formats...')
-            #update video formats
-            self.updateVideoFormats()
+            self.statusBar().showMessage('Loading available formats...') #update statusbar to let user know something is happening
+            self.updateVideoFormats() #update video formats
     
     def populateVideoFormatCombobox(self,labels):
         '''Populate the video format combobox with video formats. Clear the previous labels.
@@ -272,10 +265,7 @@ class App(QMainWindow):
         GUI_STATE_JSON_FILE.
         '''
         self.saveGUIState()
-        if True:
-            event.accept() # let the window close
-        else:
-            event.ignore()
+        event.accept() # let the window close
 
 
 def get_default_download_path():
