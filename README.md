@@ -1,6 +1,6 @@
 # youtube_dl_GUI
 
-youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube videos/audio tracks/playlists that can be easily shared and used by non-programmers. youtube_dl_GUI can be run as a standalone .exe by running /dist/youtube_dl_GUI.exe
+youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube videos/audio tracks/playlists that can be easily shared and used by non-programmers. youtube_dl_GUI can be run as a standalone .exe by running `/dist/youtube_dl_GUI.exe`
 
 ![](images/window.png)
 
