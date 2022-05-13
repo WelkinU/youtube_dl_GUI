@@ -11,9 +11,7 @@ app = FastAPI()
 
 @app.get("/")
 def home(request: Request):
-    '''
-    Returns barebones HTML form allowing the user to enter a URL and download format
-    '''
+    '''Returns barebones HTML form allowing the user to enter a URL and download format'''
 
     html_content = '''
 <head>
@@ -67,7 +65,6 @@ class DownloadRequest(BaseModel):
     @classmethod
     def as_form(cls, url: str = Form(...), download_format: str = Form(...)):
         return cls(url=url, download_format=download_format)
-
 
 
 @app.post("/")
@@ -127,7 +124,12 @@ async def exception_handler(request: Request, exc: Exception):
 
 if __name__ == '__main__':
     import uvicorn
+    import argparse
 
-    #make the app string equal to whatever the name of this file is
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', help='IP Address where the server is hosted', type=str, default='localhost')
+    parser.add_argument('--port', help='Port number where the server is hosted', type=int, default='8000')
+    args = parser.parse_args()
+
     app_str = 'server:app'
-    uvicorn.run(app_str, host='localhost', port=8000, reload=True)
+    uvicorn.run(app_str, host=args.host, port=args.port, reload=True)
