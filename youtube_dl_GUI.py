@@ -20,7 +20,6 @@ class App(QMainWindow):
         self.download_folder_list = gui_state['DownloadFolderList']
         self.default_video_formats_menu_items=['Video - Best Quality','Audio Only - Best Quality','Detect All Available Formats']
         
-        
         self.initUI()
         self.videoFormatCombobox.setCurrentIndex(gui_state['DownloadFormatComboboxIndex'])
         
@@ -56,7 +55,6 @@ class App(QMainWindow):
         self.populateVideoFormatCombobox(self.default_video_formats_menu_items) #set default values for format select combobox
         self.videoFormatCombobox.activated[str].connect(self.videoFormatChange)
         
-
         #add download button
         downloadButton = QPushButton('Download')
         downloadButton.clicked.connect(self.downloadVideo_callback)
@@ -81,12 +79,10 @@ class App(QMainWindow):
         self.show()
 
     def downloadVideo_callback(self):
-        ''' Callback for the "Download Video" button
-        '''
+        ''' Callback for the "Download Video" button'''
 
         def downloadVideo_thread_helper(self,ydl_opts):
-            '''Download the video. Meant to be called in a background daemon thread
-            '''
+            '''Download the video. Meant to be called in a background daemon thread'''
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([self.urlEntryText.text()])
 
@@ -138,8 +134,7 @@ class App(QMainWindow):
 
     def updateVideoFormats(self):
         ''' Grabs the list of available video formats in background thread and populates
-        video format combobox with results when complete.
-        '''
+        video format combobox with results when complete.'''
 
         def getVideoFormats_thread_helper(self,url):
             ''' Grabs the available video formats. Intended to be run as background thread.
@@ -262,16 +257,14 @@ class App(QMainWindow):
 
     def closeEvent(self, event):
         '''This function gets called when the user closes the GUI. It saves the GUI state to the json file
-        GUI_STATE_JSON_FILE.
-        '''
+        GUI_STATE_JSON_FILE. '''
         self.saveGUIState()
         event.accept() # let the window close
 
 
 def get_default_download_path():
-    """Returns the path for the "Downloads" folder on Linux or Windows.
-    Used as default directory for videos to be saved to.
-    """
+    """ Returns the path for the "Downloads" folder on Linux or Windows.
+    Used as default directory for videos to be saved to. """
     return os.path.join(os.path.expanduser('~'), 'downloads')
 
 if __name__ == '__main__':
