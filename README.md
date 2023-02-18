@@ -4,6 +4,12 @@ youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube
 
 ![](images/window.png)
 
+## Changelog
+
+### Feb 2023
+
+Migrating from youtube-dl to yt-dlp fork. Original repo is now broken and may not be maintained, yt-dlp fork is actively maintained.
+
 ## GUI Application Usage
 1. Run standalone [youtube_dl_GUI.exe](/dist/youtube_dl_GUI.exe) in the `/dist` folder. (Alternatively, you can run the python code youtube_dl_GUI.py - setup in "Developer Setup" section below)
 1. Enter the URL of the video / playlist you want to download into the top "URL" textbox.
@@ -15,18 +21,18 @@ youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube
 1. Click the Download button. Output will display to the console.
 
 ## Developer Setup (PyQT GUI App)
-Just set up Python3 with libraries PyQT5 (`pip install pyqt5`) and youtube_dl (`pip install youtube-dl`), and you should be able to run the code.
+Just set up Python3 with libraries PyQT5 (`pip install pyqt5`) and youtube_dl (`pip install yt-dlp`), and you should be able to run the code.
 
 ### Build Windows .exe with PyInstaller
 
 To build the code into an .exe using PyInstaller (easier to do this in an virtual environment):
 1. Install PyInstaller: `pip install pyinstaller`
-1. Make sure you have PyQT5 and youtube_dl installed
+1. Make sure you have PyQT5 and yt-dlp installed
 1. cd to the directory containing youtube_dl_GUI.py
 1. Run command: `pyinstaller.exe youtube_dl_GUI.py --onefile --hidden-import PyQt5.sip`
 
 ### Troubleshooting
-Make sure you have the latest version of the code! Youtube changes things frequently, so use the latest version of the executable in this repository. If you are a developer, use `pip install --upgrade youtube-dl`in the command line to make sure you have the latest library version.
+Make sure you have the latest version of the code! Youtube changes things frequently, so use the latest version of the executable in this repository. If you are a developer, use `pip install --upgrade yt-dlp`in the command line to make sure you have the latest library version.
 
 ## FastAPI Web Application Developer Usage
 1. Make sure you have the Python 3.6+ with proper libraries installed with `pip install -r fastapi_requirements.txt`

@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSlot
 import threading
 import json
 
-import youtube_dl
+import yt_dlp as youtube_dl
 
 GUI_STATE_JSON_FILE = './youtube_dl_GUI_state.json'
 
