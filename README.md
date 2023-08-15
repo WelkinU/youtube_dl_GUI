@@ -6,6 +6,10 @@ youtube_dl_GUI is intended to serve as a basic interface for downloading YouTube
 
 ## Changelog
 
+### Aug 2023
+
+Updating EXE to latest version of yt-dlp (prev version was broken)
+
 ### Feb 2023
 
 Migrating from youtube-dl to yt-dlp fork. Original repo is now broken and may not be maintained, yt-dlp fork is actively maintained.
